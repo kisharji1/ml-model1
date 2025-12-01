@@ -1,0 +1,9 @@
+flask>=2.0
+joblib
+numpy
+pandas
+scikit-learn
+flask
+joblib
+numpy
+scikit-learn==1.6.1

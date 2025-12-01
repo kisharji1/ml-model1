@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Delivery Mode Predictor</title>
+    <style>
+        body{
+            font-family:Arial,Helvetica,sans-serif;
+            background: url('https://img.etimg.com/thumb/width-650,height-488,imgsize-40584,resizemode-75,msid-123043817/tech/startups/delhivery-to-expand-rapid-commerce-on-demand-logistics-offerings/delhivery.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color:#222;
+            padding:30px;
+        }
+        .box{max-width:520px;margin:20px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+        label{display:block;margin-top:10px;font-weight:600}
+        input,select{width:100%;padding:8px;margin-top:6px;border:1px solid #ccc;border-radius:4px}
+        button{margin-top:14px;padding:10px 16px;background:#0066cc;color:#fff;border:none;border-radius:6px;cursor:pointer}
+        #result{margin-top:16px;font-size:1.1rem;font-weight:700}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Delivery Mode Predictor</h2>
+        <p>Enter package details and click Predict to get a suggested delivery mode.</p>
+
+        <label for="region_encoded">Region (encoded)</label>
+        <input id="region_encoded" type="number" step="1" min="0" value="0">
+        <small>Enter numeric region code (e.g. 0=north, 1=south, 2=east, 3=west) depending on your encoding.</small>
+
+        <label for="distance">Distance (km)</label>
+        <input id="distance" type="number" step="0.1" value="5">
+
+    <label for="package_weight_kg">Package weight (kg)</label>
+    <input id="package_weight_kg" type="number" step="0.1" value="2">
+
+    <label for="delivery_cost">Delivery cost (₹)</label>
+    <input id="delivery_cost" type="number" step="0.01" value="20">
+
+    <label for="delivery_id">Delivery ID</label>
+    <input id="delivery_id" type="number" step="1" value="1234">
+
+        <button id="predictBtn">Predict</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('predictBtn').addEventListener('click', async function(){
+            const payload = {
+                region_encoded: parseInt(document.getElementById('region_encoded').value) || 0,
+                distance_km: parseFloat(document.getElementById('distance').value) || 0,
+                package_weight_kg: parseFloat(document.getElementById('package_weight_kg').value) || 0,
+                delivery_cost: parseFloat(document.getElementById('delivery_cost').value) || 0,
+                delivery_id: parseInt(document.getElementById('delivery_id').value) || 0
+            };
+
+            document.getElementById('result').innerText = 'Predicting...';
+
+            try {
+                const resp = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if(!resp.ok) throw new Error('Server returned ' + resp.status);
+                                const data = await resp.json();
+                                document.getElementById('result').innerText =
+                                    'Predicted delivery mode: ' + data.predicted_mode +
+                                    ' (code: ' + data.predicted_mode_encoded + ')\nConfidence: ' + (data.confidence*100).toFixed(1) + '%';
+            } catch (err) {
+                document.getElementById('result').innerText = 'Error: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>
